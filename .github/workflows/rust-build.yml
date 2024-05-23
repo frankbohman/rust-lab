@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Generate Version
         id: versioning
-        uses: frankbohman/rust-lab/.github/actions/versioning@versioning-v2
+        uses: frankbohman/rust-lab/.github/actions/versioning@main
         with:
           artifact: "dummy"
       - name: Print Version
