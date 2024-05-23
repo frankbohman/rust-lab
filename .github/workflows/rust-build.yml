@@ -1,0 +1,51 @@
+on:
+  workflow_call:
+    inputs:
+      toolchain:
+        type: string
+        required: false
+        default: nightly
+      target:
+        type: string
+        required: false
+        default: aarch64-unknown-linux-gnu
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Version
+        id: versioning
+        uses: frankbohman/rust-lab/.github/actions/versioning@versioning-v2
+        with:
+          artifact: "dummy"
+      - name: Print Version
+        run: echo $NEW_VERSION
+        shell: bash
+        env:
+          NEW_VERSION: ${{ steps.versioning.outputs.version }}
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: ${{ inputs.toolchain }}
+          targets: ${{ inputs.target }}
+          override: true
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+      - name: Build
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy -- -D warnings
+      

@@ -1,0 +1,220 @@
+# https://ectobit.com/blog/speed-up-github-actions-rust-pipelines/
+name: Build API
+env:
+  CARGO_TERM_COLOR: always
+  RUST_TOOLCHAIN: stable
+on:
+  push:
+    branches: ["main"]
+    # paths:
+    #   - api/*
+  pull_request:
+    branches: ["main"]
+    paths:
+      - liveness/*
+      - shared/*
+  workflow_dispatch:
+
+jobs:
+  check:
+    uses: frankbohman/rust-lab/.github/workflows/rust-check.yml@main
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-gnu
+            toolchain: nightly
+  build:
+    needs: check
+    uses: frankbohman/rust-lab/.github/workflows/rust-build.yml@main
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-gnu
+            toolchain: nightly
+
+#   build:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         include:
+#           - arch: aarch64-unknown-linux-gnu
+#             profile: minimal
+#             features: "--features mimalloc"
+#             file_name: hejdeby-${{ github.ref_name }}-linux-arm64
+#             file_ext: .tar.gz
+
+#     steps:
+#       - id: versioning
+#         uses: bohmanit/hejdeby.se/.github/actions/versioning@versioning-v2
+#         with:
+#           artifact: "dummy"
+
+#   #     - run: echo $NEW_VERSION
+#   #       shell: bash
+#   #       env:
+#   #         NEW_VERSION: ${{ steps.versioning.outputs.version }}
+
+#   #     - name: Checkout sources
+#   #       uses: actions/checkout@v4
+#   #       with:
+#   #         profile: ${{ matrix.profile }}
+#   #         toolchain: ${{ matrix.toolchain }}
+
+#   #     - name: Cache cargo assets
+#   #       id: cache
+
+#   #       uses: actions/cache@v3
+#   #       with:
+#   #         path: |
+#   #           ~/.cargo/bin/
+#   #           ~/.cargo/registry/index/
+#   #           ~/.cargo/registry/cache/
+#   #           ~/.cargo/git/db/
+#   #           target/
+#   #         key: ${{ matrix.arch }}-build-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+#   #     - name: Install dependencies for linux
+#   #       if: contains(matrix.arch, 'linux-gnu')
+#   #       run: |
+#   #         sudo apt-get -y update
+#   #         sudo apt-get -y install libssl-dev pkg-config g++-aarch64-linux-gnu gcc-aarch64-linux-gnu
+
+#   #     - name: Install dependencies for linux
+#   #       if: contains(matrix.arch, 'linux-musl')
+#   #       run: |
+#   #         sudo apt-get -y update
+#   #         sudo apt-get -y install libssl-dev pkg-config g++-aarch64-linux-gnu gcc-aarch64-linux-gnu musl-dev musl-tools
+#   #         sudo ln -s "/usr/bin/g++" "/usr/bin/musl-g++"
+
+#   #     - name: Install rust toolchain
+#   #       uses: actions-rs/toolchain@v1
+#   #       with:
+#   #         toolchain: ${{ env.RUST_TOOLCHAIN }}
+#   #         target: ${{ matrix.arch }}
+#   #         override: true
+
+#   #     - name: Install rust toolchain
+#   #       uses: actions-rs/toolchain@v1
+#   #       with:
+#   #         toolchain: ${{ env.RUST_TOOLCHAIN }}
+#   #         target: ${{ matrix.arch }}
+#   #         override: true
+#   #     # - name: Output package versions
+#   #     #   run: protoc --version ; cargo version ; rustc --version ; gcc --version ; g++ --version
+
+#   #     - name: Print rustc cfg
+#   #       run: rustc --print cfg
+
+#   #     - name: Run cargo build
+#   #       if: contains(matrix.file_name, '-simd') == false
+#   #       run: cargo build ${{ matrix.features }} --profile release --target ${{ matrix.arch }}
+
+#   #     - name: Run cargo build
+#   #       if: contains(matrix.file_name, '-simd')
+#   #       run: RUSTFLAGS='-C target-feature=+avx,+avx2,+sse2,+sse3,+ssse3,+sse4.1,+sse4.2,+avx512f,+avx512cd,+avx512er,+avx512bw,+avx512dq,+avx512vl' cargo build ${{ matrix.features }} --profile release --target ${{ matrix.arch }}
+
+#   #     - name: Calculate checksum and rename binary
+#   #       if: contains(matrix.arch, 'windows') == false
+#   #       shell: bash
+#   #       run: |
+
+#   #         cd target/${{ matrix.arch }}/release
+#   #         chmod +x api
+#   #         tar -zcvf ${{ matrix.file_name }}.tar.gz api
+#   #         echo $(shasum -a 256 ${{ matrix.file_name }}.tar.gz | cut -f1 -d' ') > ${{ matrix.file_name }}.tar.gz.sha256sum
+
+#   #     - name: Upload artifacts
+#   #       uses: actions/upload-artifact@v4
+#   #       with:
+#   #         name: ${{ matrix.file_name }}
+#   #         path: target/${{ matrix.arch }}/release/${{ matrix.file_name }}${{ matrix.file_ext }}
+
+#   #     - name: Upload checksum of artifacts
+#   #       uses: actions/upload-artifact@v4
+#   #       with:
+#   #         name: ${{ matrix.file_name }}.sha256sum
+#   #         path: target/${{ matrix.arch }}/release/${{ matrix.file_name }}${{ matrix.file_ext }}.sha256sum
+
+#   # release:
+#   #   name: Release artifacts
+#   #   needs: [build]
+#   #   runs-on: ubuntu-latest
+#   #   steps:
+#   #     - id: versioning
+#   #       uses: bohmanit/hejdeby.se/.github/actions/versioning@versioning-v2
+#   #       with:
+#   #         artifact: "dummy"
+
+#   #     - run: echo $NEW_VERSION
+#   #       shell: bash
+#   #       env:
+#   #         NEW_VERSION: ${{ steps.versioning.outputs.version }}
+
+#   #     # - name: Checkout sources
+#   #     #   uses: actions/checkout@v4
+
+#   #     # - name: Semver release
+#   #     #   uses: cocogitto/cocogitto-action@v3
+#   #     #   id: release
+#   #     #   with:
+#   #     #     release: true
+#   #     #     git-user: 'Cog Bot'
+#   #     #     git-user-email: 'mycoolproject@org.org'
+
+#   #     # # The version number is accessible as a github action output
+#   #     # - name: Print version
+#   #     #   run: "echo '${{ steps.release.outputs.version }}'"
+
+#   #     # - name: Download artifacts
+#   #     #   uses: actions/download-artifact@v4
+
+#   #     # - name: Publish release
+#   #     #   uses: softprops/action-gh-release@v1
+#   #     #   with:
+#   #     #     name: "Release ${{ github.ref_name }}"
+#   #     #     generate_release_notes: true
+#   #     #     files: |
+#   #     #       **/hejdeby-*
+
+#   #     # ghcr-publish:
+
+#   #     #   runs-on: ubuntu-latest
+#   #     #   container:
+#   #     #     image: gcr.io/kaniko-project/executor:v1.22.0-debug # the kaniko image
+#   #     #   permissions:
+#   #     #     contents: read # read the repository
+#   #     #     packages: write # to push to GHCR, omit for other container registry. https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#publishing-a-package-using-an-action
+
+#   #     #   steps:
+
+#   #     #     - name: Download artifacts
+#   #     #       uses: actions/download-artifact@v4
+
+#   #     #     - name: Copy downloaded artifacts to . for Dockerfile compatibility
+#   #     #       run: cp -av ./releases/artifact/* .
+
+#   #     #     - name: Debug downloads
+#   #     #       run: pwd; ls -R
+
+#   #     #     - name: Build and Push Image to GHCR with kaniko
+#   #     #       run: |
+#   #     #         cat <<EOF > /kaniko/.docker/config.json
+#   #     #         {
+#   #     #           "auths": {
+#   #     #             "ghcr.io": {
+#   #     #               "auth": "$(echo -n "$GIT_USERNAME:$GIT_PASSWORD" | base64 -w0)"
+#   #     #             }
+#   #     #           }
+#   #     #         }
+#   #     #         EOF
+
+#   #     #         /kaniko/executor --dockerfile="./api/Dockerfile" \
+#   #     #           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}"  \
+#   #     #           --destination="$GH_REGISTRY/$IMAGE_NAME:$(echo ${GITHUB_SHA} | head  -c 7)" \
+#   #     #           ${{ env.KANIKO_CACHE_ARGS }} \
+#   #     #           --push-retry 5
+#   #     #       env: # needed to authenticate to github and download the repo
+#   #     #         GIT_USERNAME: ${{ github.actor }}
+#   #     #         GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+#   #     #         GH_REGISTRY: "ghcr.io"
+#   #     #         IMAGE_NAME: "${{ github.repository }}/nginx"

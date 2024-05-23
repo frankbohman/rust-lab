@@ -1,0 +1,11 @@
+{
+  "editor.formatOnSave": true,
+  "aws.telemetry": false,
+  "rust-analyzer.checkOnSave": true,
+  "rust-analyzer.cargo.autoreload": true,
+  "rust-analyzer.linkedProjects": [
+    "./Cargo.toml",
+    "./shared/Cargo.toml",
+    "./liveness/Cargo.toml",
+  ]
+}

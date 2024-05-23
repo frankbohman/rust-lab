@@ -1,0 +1,9 @@
+# https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file
+[toolchain]
+channel = "nightly"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
+targets = ["aarch64-unknown-linux-gnu", "aarch64-apple-darwin"]
+
+
+# cargo tree --target aarch64-unknown-linux-gnu -i openssl-sys

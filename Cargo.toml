@@ -1,0 +1,9 @@
+[workspace]
+members = ["./shared", "liveness"]
+resolver = "2"
+
+
+[profile.release]
+panic = 'abort'
+debug = false
+strip = true

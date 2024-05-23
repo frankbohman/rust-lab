@@ -1,0 +1,32 @@
+[graph]
+targets = ["aarch64-unknown-linux-gnu", "aarch64-apple-darwin"]
+
+[bans]
+# We want duplicates to be errors rather than warnings
+multiple-versions = "allow"
+deny = [
+  # We never want to use openssl
+  # { name = "openssl-sys" },
+]
+skip = [
+  # # rustls uses an old version of base64
+  # { name = "base64", version = "0.10" },
+
+
+]
+
+[advisories]
+ignore = ["RUSTSEC-2021-0141"]
+
+[licenses]
+unlicensed = "allow"
+unused-allowed-license = "allow"
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "MPL-2.0",
+  "ISC",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "Unicode-DFS-2016",
+]
