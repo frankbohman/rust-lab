@@ -22,7 +22,10 @@ async fn main() -> Result<()> {
 
   let grpc_addr = "127.0.0.1:50052".parse().unwrap();
 
-  let grpc_service = shared::proto::health::v1::health_server::HealthServer::new(HealthService::default());
+  // let (tx, rx) = tokio::sync::mpsc::channel(100);
+  let health = HealthService::new(SERVICE_NAME);
+
+  let grpc_service = shared::proto::health::v1::health_server::HealthServer::new(health.clone());
 
   tokio::spawn(async move {
     Server::builder()

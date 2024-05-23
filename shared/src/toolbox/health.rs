@@ -1,39 +1,43 @@
-use std::pin::Pin;
+use std::{pin::Pin, vec};
 
 use crate::proto::health::v1::{
   health_check_response::ServingStatus, health_server::Health, HealthCheckRequest, HealthCheckResponse,
 };
+
 use tokio_stream::Stream;
 use tonic::{Response, Status};
 
 pub use crate::proto::health::v1::health_server::HealthServer;
-pub struct HealthService {
-  // todo add mpsc channel to push statuses from elsewhere
-  services: Vec<(String, Status)>,
-}
-type HealthCheckResult<T> = Result<Response<T>, Status>;
-type ResponseStream = Pin<Box<dyn Stream<Item = Result<HealthCheckResponse, Status>> + Send + 'static>>;
 
-impl Default for HealthService {
-  fn default() -> Self {
+#[derive(Clone)]
+pub struct ServiceStatus {
+  service_name: String,
+  status:       ServingStatus,
+}
+
+impl ServiceStatus {
+  pub fn new(service_name: &str, status: ServingStatus) -> Self {
     Self {
-      // TODO: add a memorychannel to push status from somewhere else
-      services: vec![],
+      service_name: service_name.to_string(),
+      status,
     }
   }
 }
 
+#[derive(Clone)]
+pub struct HealthService {
+  // todo add mpsc channel to push statuses from elsewhere
+  services: Vec<ServiceStatus>,
+}
+type HealthCheckResult<T> = Result<Response<T>, Status>;
+type ResponseStream = Pin<Box<dyn Stream<Item = Result<HealthCheckResponse, Status>> + Send + 'static>>;
+
 impl HealthService {
-  pub fn new() -> Self { Self::default() }
-
-  pub fn register_service(&mut self, service_name: &str) {
-    self
-      .services
-      .push((service_name.to_string(), Status::ok("registered")));
-  }
-
-  pub fn update_service(&mut self, service_name: &str, status: Status) {
-    self.services.push((service_name.to_string(), status));
+  pub fn new(service_name: &str) -> Self {
+    let services = vec![ServiceStatus::new(service_name, ServingStatus::Unknown)];
+    Self {
+      services,
+    }
   }
 }
 
@@ -47,13 +51,10 @@ impl Health for HealthService {
   ) -> HealthCheckResult<HealthCheckResponse> {
     let service = &request.into_inner().service;
 
-    if let Some(svc) = self.services.iter().find(|x| x.0.as_str() == service) {
+    if let Some(svc) = self.services.iter().find(|x| &x.service_name == service) {
       Ok(tonic::Response::new(HealthCheckResponse {
-        status: svc.1.code() as i32,
+        status: svc.status as i32,
       }))
-      // Ok(tonic::Response::new(HealthCheckResponse {
-      //   status: ServingStatus::Serving as i32,
-      // }))
     } else {
       Ok(tonic::Response::new(HealthCheckResponse {
         status: ServingStatus::NotServing as i32,
