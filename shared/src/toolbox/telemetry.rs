@@ -129,7 +129,10 @@ pub fn bootstrap(service_name: &str, service_version: &str, deployment_environme
   let tracing_layer = tracing_opentelemetry::layer().with_tracer(tracer);
   let metrics_layer = tracing_opentelemetry::MetricsLayer::new(meter_provider);
 
-  let fmt_layer = tracing_subscriber::fmt::layer().event_format(crate::toolbox::traceidformat::TraceIdFormat);
+  let fmt_layer = tracing_subscriber::fmt::layer()
+    .with_line_number(true)
+    .with_file(true)
+    .event_format(crate::toolbox::traceidformat::TraceIdFormat);
   let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
   let subscriber = tracing_subscriber::registry()

@@ -4,6 +4,7 @@ use shared::tokio;
 use shared::tonic;
 use shared::toolbox::health::HealthService;
 use shared::tracing;
+use shared::tracing::error;
 use shared::tracing::info;
 use tonic::transport::Server;
 
@@ -22,15 +23,15 @@ async fn main() -> Result<()> {
     deployment_environment, SERVICE_NAME, SERVICE_VERSION
   );
   shared::toolbox::telemetry::bootstrap(SERVICE_NAME, SERVICE_VERSION, &deployment_environment)?;
-  let config = shared::toolbox::config::load::<config::AppConfig>()?;
-  info!("{:?}", config);
+  let config = shared::toolbox::config::load::<config::AppConfig>().await?;
 
-  let grpc_addr = "127.0.0.1:50052".parse().unwrap();
+  info!("{:?}", config);
 
   let health = HealthService::new(SERVICE_NAME);
 
   let grpc_service = shared::proto::health::v1::health_server::HealthServer::new(health.clone());
 
+  let grpc_addr = config.grpc.endpoint.parse().unwrap();
   tokio::spawn(async move {
     Server::builder()
       .add_service(grpc_service)
@@ -41,7 +42,7 @@ async fn main() -> Result<()> {
 
   let app = Router::new().route("/", get(handler));
   shared::axum::serve(
-    tokio::net::TcpListener::bind("127.0.0.1:8080").await?,
+    tokio::net::TcpListener::bind(config.web.endpoint).await?,
     app.into_make_service(),
   )
   .await?;
