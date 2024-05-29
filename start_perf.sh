@@ -1,0 +1,2 @@
+rm -f report.html
+cargo run --release --package liveness-perftest -- --host http://localhost:8080 --users 10 --run-time 1m --startup-time 1s --report-file=report.html --no-reset-metrics & open report.html

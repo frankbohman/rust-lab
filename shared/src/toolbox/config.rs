@@ -1,12 +1,11 @@
 use config::{Config, Environment, File};
 use serde::de::DeserializeOwned;
-use std::env;
 use std::fmt::Error;
 
 type Result<T> = std::result::Result<T, Error>;
 
-pub async fn load<T: DeserializeOwned>() -> Result<T> {
-  let env = env::var("DEPLOYMENT_ENVIRONMENT").unwrap_or_else(|_| "development".into());
+pub async fn load<T: DeserializeOwned>(deployment_environment: Option<String>) -> Result<T> {
+  let env = deployment_environment.unwrap_or("development".into());
 
   Config::builder()
     .add_source(File::with_name("./config/default"))

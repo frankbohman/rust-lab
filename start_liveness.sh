@@ -1,0 +1,1 @@
+cargo run --release --package liveness

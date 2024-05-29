@@ -4,7 +4,6 @@ use shared::tokio;
 use shared::tonic;
 use shared::toolbox::health::HealthService;
 use shared::tracing;
-use shared::tracing::error;
 use shared::tracing::info;
 use tonic::transport::Server;
 
@@ -23,15 +22,21 @@ async fn main() -> Result<()> {
     deployment_environment, SERVICE_NAME, SERVICE_VERSION
   );
   shared::toolbox::telemetry::bootstrap(SERVICE_NAME, SERVICE_VERSION, &deployment_environment)?;
-  let config = shared::toolbox::config::load::<config::AppConfig>().await?;
+
+  // load config from ./config/default
+  // then merge with ./config/<environment>
+  let config = shared::toolbox::config::load::<config::AppConfig>(Some(deployment_environment)).await?;
 
   info!("{:?}", config);
 
   let health = HealthService::new(SERVICE_NAME);
 
-  let grpc_service = shared::proto::health::v1::health_server::HealthServer::new(health.clone());
+  let grpc_service: shared::toolbox::health::HealthServer<HealthService> =
+    shared::proto::health::v1::health_server::HealthServer::new(health.clone());
 
-  let grpc_addr = config.grpc.endpoint.parse().unwrap();
+  let grpc_addr: std::net::SocketAddr = config.grpc.endpoint.parse().unwrap();
+
+  // to multiplex or not to multiplex (with tower), thats the question
   tokio::spawn(async move {
     Server::builder()
       .add_service(grpc_service)
@@ -52,5 +57,6 @@ async fn main() -> Result<()> {
 #[tracing::instrument]
 async fn handler() -> &'static str {
   // ...
+  // info!("Hello....");
   "Hello, World!"
 }
