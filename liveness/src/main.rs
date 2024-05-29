@@ -4,6 +4,7 @@ use shared::tokio;
 use shared::tonic;
 use shared::toolbox::health::HealthService;
 use shared::tracing;
+use shared::tracing::info;
 use tonic::transport::Server;
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
@@ -21,10 +22,11 @@ async fn main() -> Result<()> {
     deployment_environment, SERVICE_NAME, SERVICE_VERSION
   );
   shared::toolbox::telemetry::bootstrap(SERVICE_NAME, SERVICE_VERSION, &deployment_environment)?;
+  let config = shared::toolbox::config::load::<config::AppConfig>()?;
+  info!("{:?}", config);
 
   let grpc_addr = "127.0.0.1:50052".parse().unwrap();
 
-  
   let health = HealthService::new(SERVICE_NAME);
 
   let grpc_service = shared::proto::health::v1::health_server::HealthServer::new(health.clone());

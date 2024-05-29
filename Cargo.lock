@@ -1154,7 +1154,7 @@ name = "liveness"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "config",
+ "serde",
  "shared",
 ]
 
@@ -2018,6 +2018,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum 0.7.5",
+ "config",
  "env_logger",
  "envy",
  "futures",

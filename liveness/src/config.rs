@@ -1,16 +1,17 @@
-use std::env;
+use serde::Deserialize;
 
-use config::{Config, Environment, File};
+#[derive(Clone, Debug, Deserialize)]
+pub struct GrpcConfig {
+  pub endpoint: String,
+}
 
-type Result<T> = std::result::Result<T, anyhow::Error>;
-pub async fn load() -> Result<()> {
-  let env = env::var("DEPLOYMENT_ENVIRONMENT").unwrap_or_else(|_| "development".into());
+#[derive(Clone, Debug, Deserialize)]
+pub struct WebConfig {
+  pub endpoint: String,
+}
 
-  let s = Config::builder()
-    .add_source(File::with_name("config/default"))
-    .add_source(File::with_name(&format!("config/{}", env)).required(false))
-    .add_source(Environment::with_prefix("APP"))
-    .build()?;
-
-  Ok(())
+#[derive(Clone, Debug, Deserialize)]
+pub struct AppConfig {
+  pub grpc: GrpcConfig,
+  pub web:  WebConfig,
 }

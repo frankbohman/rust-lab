@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 shared = { path = "../shared" }
 anyhow = { version = "1.0" }
-config = "0.14"
+serde = "1"
