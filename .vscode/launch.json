@@ -4,27 +4,58 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Liveness",
+      "name": "Liveness HTTP",
       "cargo": {
         "args": [
           "build",
-          "--bin=liveness",
-          "--package=liveness"
+          "--bin=liveness-http",
+          "--package=liveness-http"
         ],
         "filter": {
-          "name": "liveness",
+          "name": "liveness-http",
           "kind": "bin"
         }
       },
       "args": [],
-      "cwd": "${workspaceFolder}/liveness",
+      "cwd": "${workspaceFolder}/liveness-http",
       "env": {
         "DEPLOYMENT_ENVIRONMENT": "local",
         "RUST_BACKTRACE": "1",
         "POOL_SIZE": "1",
         "RUST_LOG": "debug, aws_config=debug",
         "OTEL_LOG_LEVEL": "debug",
-        "SAM_CLI_BETA_RUST_CARGO_LAMBDA": "1",
+        // "SAM_CLI_BETA_RUST_CARGO_LAMBDA": "1",
+        // "AWS_LAMBDA_FUNCTION_NAME": "hejdeby-api",
+        // "AWS_LAMBDA_FUNCTION_MEMORY_SIZE": "32",
+        // "AWS_LAMBDA_FUNCTION_VERSION": "1",
+        // "AWS_LAMBDA_LOG_GROUP_NAME": "/aws/lambda/hejdeby-api",
+        // "AWS_LAMBDA_RUNTIME_API": "127.0.0.1:9001",
+      }
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Liveness gRPC",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=liveness-grpc",
+          "--package=liveness-grpc"
+        ],
+        "filter": {
+          "name": "liveness-grpc",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}/liveness-grpc",
+      "env": {
+        "DEPLOYMENT_ENVIRONMENT": "local",
+        "RUST_BACKTRACE": "1",
+        "POOL_SIZE": "1",
+        "RUST_LOG": "debug, aws_config=debug",
+        "OTEL_LOG_LEVEL": "debug",
+        // "SAM_CLI_BETA_RUST_CARGO_LAMBDA": "1",
         // "AWS_LAMBDA_FUNCTION_NAME": "hejdeby-api",
         // "AWS_LAMBDA_FUNCTION_MEMORY_SIZE": "32",
         // "AWS_LAMBDA_FUNCTION_VERSION": "1",

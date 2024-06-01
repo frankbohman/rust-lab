@@ -1,1 +1,1 @@
-cargo run --release --package liveness
+cargo run --release --package liveness-http

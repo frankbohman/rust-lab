@@ -1,5 +1,5 @@
 [workspace]
-members = ["./shared", "liveness", "liveness-perftest"]
+members = ["./shared", "liveness-grpc", "liveness-http", "liveness-perftest"]
 resolver = "2"
 
 

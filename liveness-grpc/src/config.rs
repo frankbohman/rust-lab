@@ -6,12 +6,6 @@ pub struct GrpcConfig {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct WebConfig {
-  pub endpoint: String,
-}
-
-#[derive(Clone, Debug, Deserialize)]
 pub struct AppConfig {
   pub grpc: GrpcConfig,
-  pub web:  WebConfig,
 }

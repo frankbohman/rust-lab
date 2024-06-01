@@ -21,7 +21,6 @@ jobs:
         with:
           toolchain: ${{ inputs.toolchain }}
           targets: ${{ inputs.target }}
-          override: true
           components: rustfmt, clippy
       - name: Set up cargo cache
         uses: actions/cache@v3

@@ -1,11 +1,13 @@
+use shared::axum::body::Body;
+use shared::axum::http::Request;
 use shared::axum::routing::get;
 use shared::axum::Router;
 use shared::tokio;
-use shared::tonic;
-use shared::toolbox::health::HealthService;
-use shared::tracing;
-use shared::tracing::info;
-use tonic::transport::Server;
+use shared::tokio::net::TcpListener;
+use shared::tower::ServiceBuilder;
+use shared::tower_http::trace::TraceLayer;
+use shared::tracing::{self, field, Span};
+use shared::tracing::{info, info_span, trace_span};
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
 
@@ -21,6 +23,7 @@ async fn main() -> Result<()> {
     "{}::{}::{}",
     deployment_environment, SERVICE_NAME, SERVICE_VERSION
   );
+
   shared::toolbox::telemetry::bootstrap(SERVICE_NAME, SERVICE_VERSION, &deployment_environment)?;
 
   // load config from ./config/default
@@ -29,34 +32,35 @@ async fn main() -> Result<()> {
 
   info!("{:?}", config);
 
-  let health = HealthService::new(SERVICE_NAME);
+  let app = Router::new()
+    .route("/", get(handler))
+    .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http().make_span_with(make_span)));
 
-  let grpc_service: shared::toolbox::health::HealthServer<HealthService> =
-    shared::proto::health::v1::health_server::HealthServer::new(health.clone());
-
-  let grpc_addr: std::net::SocketAddr = config.grpc.endpoint.parse().unwrap();
-
-  // to multiplex or not to multiplex (with tower), thats the question
-  tokio::spawn(async move {
-    Server::builder()
-      .add_service(grpc_service)
-      .serve(grpc_addr)
-      .await
-      .expect("gRPC server failed");
-  });
-
-  let app = Router::new().route("/", get(handler));
   shared::axum::serve(
-    tokio::net::TcpListener::bind(config.web.endpoint).await?,
+    TcpListener::bind(config.http.endpoint).await?,
     app.into_make_service(),
   )
   .await?;
 
   Ok(())
 }
+
 #[tracing::instrument]
 async fn handler() -> &'static str {
   // ...
   // info!("Hello....");
   "Hello, World!"
+}
+
+fn make_span(request: &Request<Body>) -> Span {
+  let headers = request.headers();
+
+  let path = request.uri().path();
+
+  // Disable (well, silence) spans/traces for root spans.
+  if path.is_empty() || path == "/" {
+    trace_span!("incoming request", path, ?headers, trace_id = field::Empty)
+  } else {
+    info_span!("incoming request", path, ?headers, trace_id = field::Empty)
+  }
 }
