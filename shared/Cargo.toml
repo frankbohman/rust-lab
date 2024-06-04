@@ -58,6 +58,7 @@ opentelemetry-stdout = { version = "0.2", features = [
 ] }
 tracing-serde = "0.1.3"
 opentelemetry-appender-tracing = "0.2.0"
+tonic-health = "0.11.0"
 
 
 [build-dependencies]

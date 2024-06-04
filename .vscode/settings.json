@@ -3,9 +3,13 @@
   "aws.telemetry": false,
   "rust-analyzer.checkOnSave": true,
   "rust-analyzer.cargo.autoreload": true,
+  "rust-analyzer.inlayHints.enable": true,
+  "rust-analyzer.cargo.loadOutDirsFromCheck": true,
+  "rust-analyzer.cargoFeatures.loadOutDirsFromCheck": true,
   "rust-analyzer.linkedProjects": [
     "./Cargo.toml",
     "./shared/Cargo.toml",
-    "./liveness/Cargo.toml",
-  ]
+  ],
+  
 }
+// Did you enable rust-analyzer.cargo.loadOutDirsFromCheck

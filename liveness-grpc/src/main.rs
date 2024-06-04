@@ -21,6 +21,7 @@ const SERVICE_VERSION: &str = env!("CARGO_PKG_VERSION");
 const SERVICE_NAME: &str = env!("CARGO_PKG_NAME");
 
 mod config;
+mod echo;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -39,10 +40,10 @@ async fn main() -> Result<()> {
 
   let health = HealthService::new(SERVICE_NAME);
 
-  let health_service: shared::toolbox::health::HealthServer<HealthService> =
-    shared::proto::health::v1::health_server::HealthServer::new(health.clone());
+  // let (mut health_reporter, health_service) = shared::tonic_health::server::health_reporter();
+  // health_reporter.set_serving::<GreeterServer<MyGreeter>>().await;
 
-  let web_service = shared::tonic_web::enable(health_service.clone());
+  // let web_service = shared::tonic_web::enable(health_service.clone());
   let addr: std::net::SocketAddr = config.grpc.endpoint.parse().unwrap();
 
   let reflection_service = shared::tonic_reflection::server::Builder::configure()
@@ -52,8 +53,8 @@ async fn main() -> Result<()> {
 
   let app = Server::builder()
     .accept_http1(true)
-    .add_service(web_service)
-    .add_service(health_service)
+    // .add_service(web_service)
+    // .add_service(health_service)
     .add_service(reflection_service);
 
   app

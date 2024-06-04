@@ -1,39 +1,25 @@
-// use http::{Request, Response};
-// use tower::{Layer, Service};
-// #[derive(Default, Debug, Clone)]
-// pub struct OtelGrpcLayer {}
+use std::{
+  pin::Pin,
+  task::{Context, Poll},
+  time::Duration,
+};
+use tonic::{body::BoxBody, transport::Server, Request, Response, Status};
+use tower::{Layer, Service};
 
-// impl OtelGrpcLayer {
-// }
+#[derive(Debug, Clone, Default)]
+struct TelemetryLayer;
 
-// #[derive(Debug, Clone)]
-// pub struct OtelGrpcService<S> {
-//   inner: S,
-// }
+#[derive(Debug, Clone)]
+struct TelemetryMiddleware<S> {
+  inner: S,
+}
 
-// impl<S> Layer<S> for OtelGrpcLayer {
-//   type Service = OtelGrpcService<S>;
+impl<S> Layer<S> for TelemetryLayer {
+  type Service = TelemetryMiddleware<S>;
 
-//   fn layer(&self, inner: S) -> Self::Service {
-//     OtelGrpcService {
-//       inner,
-//     }
-//   }
-// }
-
-// impl<S, REQ, RES> Service<REQ> for OtelGrpcService<S>
-// where
-//   S: Service<Request<REQ>, Response = Response<RES>, Error = BoxError> + Clone + Send + 'static,
-//   S::Future: Send + 'static,
-//   REQ: Send + 'static,
-// {
-//   type Error = S::Error;
-//   type Future = ResponseFuture<S::Future>;
-//   type Response = S::Response;
-
-//   fn poll_ready(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<Result<(), Self::Error>> {
-//     todo!()
-//   }
-
-//   fn call(&mut self, req: REQ) -> Self::Future { todo!() }
-// }
+  fn layer(&self, service: S) -> Self::Service {
+    TelemetryMiddleware {
+      inner: service
+    }
+  }
+}

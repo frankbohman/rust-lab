@@ -1,8 +1,11 @@
 pub mod proto;
 pub mod toolbox;
+
 pub use axum;
+pub use proto::echo;
 pub use tokio;
 pub use tonic;
+pub use tonic_health;
 pub use tonic_reflection;
 pub use tonic_web;
 pub use tracing;
