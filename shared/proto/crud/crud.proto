@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package crud;
+
+import "google/api/annotations.proto";
+
+
+service Crud {
+  rpc Create (CreateRequest) returns (ReadReply) {}
+  rpc Read (ReadRequest) returns (ReadReply) {}
+  rpc Update (UpdateRequest) returns (ReadReply) {}
+  rpc Delete (DeleteRequest) returns (DeleteReply) {}
+}
+
+
+message Payload{
+  string message = 1;
+} 
+
+message CreateRequest {
+  Payload payload = 1;
+}
+
+message ReadRequest {
+  string id = 1;
+}
+
+message ReadReply {
+  string id = 1;
+  Payload payload = 2;
+}
+
+message UpdateRequest {
+  Payload payload = 1;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteReply {}

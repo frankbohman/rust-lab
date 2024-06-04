@@ -21,14 +21,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
   std::fs::create_dir_all(out_dir.clone()).expect("cannot create output dir");
 
   tonic_build::configure()
-    .file_descriptor_set_path(out_dir.clone().join("echo_descriptor.bin"))
+    .file_descriptor_set_path(out_dir.clone().join("crud_descriptor.bin"))
     .out_dir(out_dir.clone())
     .build_client(true) // used for tests
     .build_server(true)
     .compile(
-      &["proto/echo/echo.proto"],
-      &["proto/echo"],
-    )?; 
+      &["proto/crud/crud.proto"],
+      &["proto"],
+    )?;
 
   tonic_build::configure()
     .file_descriptor_set_path(out_dir.clone().join("health_descriptor.bin"))
@@ -40,24 +40,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       &["proto/health/v1"],
     )?;
 
-  // let protos = list_protos(Path::new(PROTOS))?;
-  // tonic_build::configure()
-  //     .build_client(false)
-  //     .compile(&protos, &[PROTOS])
-  //     .context("compile protos")
-
   Ok(())
 }
-
-// fn list_protos(dir: &Path) -> Result<Vec<PathBuf>> {
-//   WalkDir::new(dir)
-//     .into_iter()
-//     .try_fold(vec![], |mut protos, entry| {
-//       let entry = entry.context("read proto file")?;
-//       let path = entry.path();
-//       if path.extension().and_then(OsStr::to_str) == Some("proto") {
-//         protos.push(path.to_path_buf());
-//       }
-//       Ok(protos)
-//     })
-// }

@@ -2,7 +2,7 @@ pub mod proto;
 pub mod toolbox;
 
 pub use axum;
-pub use proto::echo;
+pub use proto::crud;
 pub use tokio;
 pub use tonic;
 pub use tonic_health;
