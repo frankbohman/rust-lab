@@ -1,7 +1,9 @@
 use std::time::Duration;
 
+use crud::CrudService;
 use shared::axum::body::Body;
 use shared::axum::http::Request;
+use shared::crud::crud_server::CrudServer;
 use shared::tokio;
 use shared::tokio::signal::unix::signal;
 use shared::tokio::signal::unix::SignalKind;
@@ -13,6 +15,7 @@ use shared::tracing::field;
 use shared::tracing::info;
 use shared::tracing::info_span;
 use shared::tracing::Span;
+use state::State;
 use tonic::transport::Server;
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
@@ -21,7 +24,8 @@ const SERVICE_VERSION: &str = env!("CARGO_PKG_VERSION");
 const SERVICE_NAME: &str = env!("CARGO_PKG_NAME");
 
 mod config;
-mod echo;
+mod crud;
+mod state;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -35,16 +39,15 @@ async fn main() -> Result<()> {
   // load config from ./config/default
   // then merge with ./config/<environment>
   let config = shared::toolbox::config::load::<config::AppConfig>(Some(deployment_environment)).await?;
-
   info!("{:?}", config);
 
-  let health = HealthService::new(SERVICE_NAME);
+  let (mut health_reporter, health_service) = shared::tonic_health::server::health_reporter();
+  health_reporter.set_serving::<CrudServer<CrudService>>().await;
 
-  // let (mut health_reporter, health_service) = shared::tonic_health::server::health_reporter();
-  // health_reporter.set_serving::<GreeterServer<MyGreeter>>().await;
+  let crud = CrudService::new(State::default());
 
   // let web_service = shared::tonic_web::enable(health_service.clone());
-  let addr: std::net::SocketAddr = config.grpc.endpoint.parse().unwrap();
+  let addr = config.grpc.endpoint.parse::<std::net::SocketAddr>().unwrap();
 
   let reflection_service = shared::tonic_reflection::server::Builder::configure()
     .register_encoded_file_descriptor_set(shared::proto::health::v1::FILE_DESCRIPTOR_SET)
@@ -53,9 +56,9 @@ async fn main() -> Result<()> {
 
   let app = Server::builder()
     .accept_http1(true)
-    // .add_service(web_service)
-    // .add_service(health_service)
-    .add_service(reflection_service);
+    .add_service(health_service)
+    .add_service(reflection_service)
+    .add_service(CrudServer::new(crud));
 
   app
     .serve_with_shutdown(addr, shutdown_signal(Some(Duration::from_secs(1))))

@@ -1361,6 +1361,7 @@ dependencies = [
  "anyhow",
  "serde",
  "shared",
+ "uuid",
 ]
 
 [[package]]
