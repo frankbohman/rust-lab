@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use crud::CrudService;
 use shared::axum::body::Body;
+use shared::axum::http::Method;
 use shared::axum::http::Request;
 use shared::crud::crud_server::CrudServer;
 use shared::tokio;
@@ -9,8 +10,10 @@ use shared::tokio::signal::unix::signal;
 use shared::tokio::signal::unix::SignalKind;
 use shared::tokio::time;
 use shared::tonic;
-use shared::toolbox::health::HealthService;
-
+use shared::tonic_web::CorsGrpcWeb;
+use shared::tonic_web::GrpcWebLayer;
+use shared::tower_http::cors::Any;
+use shared::tower_http::cors::CorsLayer;
 use shared::tracing::field;
 use shared::tracing::info;
 use shared::tracing::info_span;
@@ -45,23 +48,23 @@ async fn main() -> Result<()> {
   health_reporter.set_serving::<CrudServer<CrudService>>().await;
 
   let crud = CrudService::new(State::default());
+  let crud = CrudServer::new(crud);
 
-  // let web_service = shared::tonic_web::enable(health_service.clone());
-  let addr = config.grpc.endpoint.parse::<std::net::SocketAddr>().unwrap();
+  let crud_reflection = shared::tonic_reflection::server::Builder::configure()
+    .register_encoded_file_descriptor_set(shared::proto::crud::FILE_DESCRIPTOR_SET)
+    .build()?;
 
-  let reflection_service = shared::tonic_reflection::server::Builder::configure()
-    .register_encoded_file_descriptor_set(shared::proto::health::v1::FILE_DESCRIPTOR_SET)
-    .build()
-    .unwrap();
-
-  let app = Server::builder()
+  // grpcurl -plaintext 127.0.0.1:50051 describe crud.Crud
+  // grpcurl -d '{"id": "1234"}' -import-path shared/proto -proto shared/proto/crud/crud.proto -plaintext 127.0.0.1:50051 crud.Crud/Read
+  Server::builder()
     .accept_http1(true)
+    .add_service(shared::tonic_web::enable(crud.clone()))
     .add_service(health_service)
-    .add_service(reflection_service)
-    .add_service(CrudServer::new(crud));
-
-  app
-    .serve_with_shutdown(addr, shutdown_signal(Some(Duration::from_secs(1))))
+    .add_service(crud_reflection)
+    .serve_with_shutdown(
+      config.grpc.endpoint.parse()?,
+      shutdown_signal(Some(Duration::from_secs(1))),
+    )
     .await?;
 
   Ok(())
@@ -82,10 +85,3 @@ async fn shutdown_signal(shutdown_timeout: Option<Duration>) {
     time::sleep(shutdown_timeout).await;
   }
 }
-// let trace_layer = ServiceBuilder::new()
-//   .layer(TraceLayer::new_for_grpc().make_span_with(make_span))
-//   .map_request(accept_trace)
-//   .map_request(record_trace_id);
-
-// let trace_layer = ServiceBuilder::new().layer(TraceLayer::new_for_grpc().make_span_with(make_span));
-// let trace_layer = ServiceBuilder::new().layer(TraceLayer::new_for_grpc());

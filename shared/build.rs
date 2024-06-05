@@ -21,10 +21,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
   std::fs::create_dir_all(out_dir.clone()).expect("cannot create output dir");
 
   tonic_build::configure()
+    .server_mod_attribute("attrs", "#[cfg(feature = \"server\")]")
+    .server_attribute("Echo", "#[derive(PartialEq)]")
+    .client_mod_attribute("attrs", "#[cfg(feature = \"client\")]")
+    .client_attribute("Echo", "#[derive(PartialEq)]")
     .file_descriptor_set_path(out_dir.clone().join("crud_descriptor.bin"))
     .out_dir(out_dir.clone())
     .build_client(true) // used for tests
     .build_server(true)
+    
     .compile(
       &["proto/crud/crud.proto"],
       &["proto"],

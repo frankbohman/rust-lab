@@ -1,11 +1,8 @@
-use std::sync::Arc;
-
 use shared::{
   crud::{
-    crud_server::Crud, CreateRequest, DeleteReply, DeleteRequest, Payload, ReadReply, ReadRequest,
-    UpdateRequest,
+    crud_server::Crud, CreateRequest, DeleteReply, DeleteRequest, ReadReply, ReadRequest, UpdateRequest,
   },
-  tonic::{self, Response, Status},
+  tonic::{self, server::NamedService, Response, Status},
 };
 use uuid::Uuid;
 
@@ -14,6 +11,10 @@ use crate::state::State;
 #[derive(Clone)]
 pub struct CrudService {
   state: State,
+}
+
+impl NamedService for CrudService {
+  const NAME: &'static str = "CrudService";
 }
 
 impl CrudService {
@@ -28,16 +29,14 @@ impl CrudService {
 impl Crud for CrudService {
   async fn create(&self, request: tonic::Request<CreateRequest>) -> Result<Response<ReadReply>, Status> {
     let id = Uuid::new_v4().to_string();
-    let payload = Payload {
-      message: "Howdy...!".into(),
-    };
+    let req = request.get_ref();
 
-    if let Some(payload) = request.get_ref().payload {
+    if let Some(payload) = req.payload.clone() {
       let mut data = self.state.data.lock().unwrap();
       data.insert(id.clone(), payload.clone());
       Ok(Response::new(ReadReply {
         id,
-        Some(payload),
+        payload: Some(payload),
       }))
     } else {
       Err(Status::invalid_argument("No payload provided"))
