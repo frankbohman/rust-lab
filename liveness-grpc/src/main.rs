@@ -55,8 +55,8 @@ async fn main() -> Result<()> {
     .build()?;
 
   // grpcurl -plaintext 127.0.0.1:50051 describe crud.Crud
-  // grpcurl -d '{"message": "Heppåre!"}' -import-path shared/proto -proto shared/proto/crud/crud.proto -plaintext 127.0.0.1:50051 crud.Crud/Create
-  // grpcurl -d '{"id": "1234"}' -import-path shared/proto -proto shared/proto/crud/crud.proto -plaintext 127.0.0.1:50051 crud.Crud/Read
+  // grpcurl -d '{"payload":{"message": "Heppåre!"}}' -import-path shared/proto -proto shared/proto/crud/crud.proto -plaintext 127.0.0.1:50051 crud.Crud/Create
+  // grpcurl -d '{"id": "91632d47-b5de-42f6-85d8-1c6e58cf7845"}' -import-path shared/proto -proto shared/proto/crud/crud.proto -plaintext 127.0.0.1:50051 crud.Crud/Read
   Server::builder()
     .accept_http1(true)
     .add_service(shared::tonic_web::enable(crud.clone()))
