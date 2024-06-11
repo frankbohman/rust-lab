@@ -10,3 +10,4 @@ shared = { path = "../shared" }
 anyhow = { version = "1.0" }
 serde = "1"
 uuid = "1"
+tracing = "0.1"

@@ -8,7 +8,6 @@ pub use tonic;
 pub use tonic_health;
 pub use tonic_reflection;
 pub use tonic_web;
-pub use tracing;
 
 pub use tower;
 pub use tower_http;

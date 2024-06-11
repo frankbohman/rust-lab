@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crud::CrudService;
 use shared::axum::body::Body;
-use shared::axum::http::Method;
+
 use shared::axum::http::Request;
 use shared::crud::crud_server::CrudServer;
 use shared::tokio;
@@ -10,16 +10,12 @@ use shared::tokio::signal::unix::signal;
 use shared::tokio::signal::unix::SignalKind;
 use shared::tokio::time;
 use shared::tonic;
-use shared::tonic_web::CorsGrpcWeb;
-use shared::tonic_web::GrpcWebLayer;
-use shared::tower_http::cors::Any;
-use shared::tower_http::cors::CorsLayer;
-use shared::tracing::field;
-use shared::tracing::info;
-use shared::tracing::info_span;
-use shared::tracing::Span;
 use state::State;
 use tonic::transport::Server;
+use tracing::field;
+use tracing::info;
+use tracing::info_span;
+use tracing::Span;
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
 

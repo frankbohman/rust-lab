@@ -4,6 +4,7 @@ use shared::{
   },
   tonic::{self, server::NamedService, Response, Status},
 };
+
 use uuid::Uuid;
 
 use crate::state::State;
@@ -43,7 +44,6 @@ impl Crud for CrudService {
     }
   }
 
-  #[shared::tracing::instrument(skip = request)]
   async fn read(&self, request: tonic::Request<ReadRequest>) -> Result<Response<ReadReply>, Status> {
     if let Some(payload) = self.state.data.lock().unwrap().get(&request.get_ref().id) {
       Ok(Response::new(ReadReply {

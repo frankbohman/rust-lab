@@ -1361,6 +1361,7 @@ dependencies = [
  "anyhow",
  "serde",
  "shared",
+ "tracing",
  "uuid",
 ]
 
@@ -1371,6 +1372,7 @@ dependencies = [
  "anyhow",
  "serde",
  "shared",
+ "tracing",
 ]
 
 [[package]]
@@ -1380,6 +1382,7 @@ dependencies = [
  "goose",
  "goose-eggs",
  "tokio",
+ "tracing",
 ]
 
 [[package]]

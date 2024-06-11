@@ -6,8 +6,7 @@ use shared::tokio;
 use shared::tokio::net::TcpListener;
 use shared::tower::ServiceBuilder;
 use shared::tower_http::trace::TraceLayer;
-use shared::tracing::{self, field, Span};
-use shared::tracing::{info, info_span, trace_span};
+use tracing::{field, info, info_span, trace_span, Span};
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
 

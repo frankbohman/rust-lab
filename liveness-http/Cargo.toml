@@ -9,3 +9,4 @@ edition = "2021"
 shared = { path = "../shared" }
 anyhow = { version = "1.0" }
 serde = "1"
+tracing = "0.1"
