@@ -55,10 +55,10 @@ jobs:
           ## Find security vulnerabilities in crates reported to RustSec Advisory Database
           cargo audit
 
-      - name: Vulnerability Report
-        run: |
-          ## Generate a BOM of dependencies containing vulnerabilities
-          cargo pants
-          
+      # - name: Vulnerability Report
+      #   run: |
+      #     ## Generate a BOM of dependencies containing vulnerabilities
+      #     cargo pants
+
       - name: Test
         run: cargo test
