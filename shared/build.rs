@@ -29,7 +29,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .out_dir(out_dir.clone())
     .build_client(true) // used for tests
     .build_server(true)
-    
     .compile(
       &["proto/crud/crud.proto"],
       &["proto"],
