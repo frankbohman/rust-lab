@@ -1,4 +1,3 @@
-use crate::proto::health::v1::health_server::Health;
 use opentelemetry::{global, propagation::Injector};
 use tonic::{
   metadata::{MetadataKey, MetadataMap, MetadataValue},
