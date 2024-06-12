@@ -34,24 +34,31 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
-      - name: Lint
+      - name: Format and Lint
         run: |
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
-      - name: Check
-        run: |
 
+      - name: Check Deny
+        run: |
           ## Find unwanted useage and other compliance things
-          cargo deny check
-          ## Find outdated dependencies
-          # cargo outdated --exit-code 1
-          cargo outdated --exit-code 0
-          ## Find unused dependencies
-          # cargo udeps
+          cargo deny check advisories bans sources
+
+      - name: Check Outdated Dependencies
+        run: |
+            ## Find outdated dependencies
+            # cargo outdated --exit-code 1
+
+      - name: Check Audit
+        run: |
           rm -rf ~/.cargo/advisory-db
           ## Find security vulnerabilities in crates reported to RustSec Advisory Database
           cargo audit
+
+      - name: Vulnerability Report
+        run: |
           ## Generate a BOM of dependencies containing vulnerabilities
           cargo pants
+          
       - name: Test
         run: cargo test
