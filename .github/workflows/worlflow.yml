@@ -1,5 +1,5 @@
 # https://ectobit.com/blog/speed-up-github-actions-rust-pipelines/
-name: Build API
+name: Rust Workflow
 env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: stable
