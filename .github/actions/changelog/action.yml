@@ -1,0 +1,35 @@
+name: Generate changelog
+on:
+  workflow_call:
+    inputs:
+      changelog-path:
+        description: Path to changelog
+        default: CHANGELOG.md
+        type: string
+      update-major-tag:
+        description: "Creates or updates the tag for major version, example: v1"
+        default: false
+        type: boolean
+jobs:
+  generate-version:
+    runs-on: ${{ vars.ARC_RUNNER }}
+    outputs:
+      version: ${{ steps.generate-version.outputs.version  }}
+    steps:
+      - name: Generate version
+        id: generate-version
+        uses: SvenskaSpelAB/generate-version-action@v1
+        with:
+          release: true
+  tag-branch-and-generate-changelog:
+    runs-on: ${{ vars.ARC_RUNNER }}
+    needs: generate-version
+    steps:
+      - name: Tag branch with latest version and generate changelog
+        uses: SvenskaSpelAB/versioning-action@v1
+        with:
+          version: ${{ needs.generate-version.outputs.version }}
+          changelog-path: ${{ inputs.changelog-path }}
+          update-major-tag: ${{ inputs.update-major-tag }}
+          app-id: ${{ secrets.svsactionsbot_app_id }}
+          private-key: ${{ secrets.svsactionsbot_private_key }}

@@ -2,11 +2,11 @@
   "recommendations": [
     "rust-lang.rust-analyzer",
     "tamasfe.even-better-toml",
+    "zxh404.vscode-proto3",
     "vadimcn.vscode-lldb",
     "ms-azuretools.vscode-docker",
     "serayuzgur.crates",
     "rust-lang.rust-analyzer",
-    // "humao.rest-client",
     // "amazonwebservices.aws-toolkit-vscode",
     "eamodio.gitlens",
     "github.vscode-github-actions",

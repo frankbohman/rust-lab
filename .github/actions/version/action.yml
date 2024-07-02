@@ -1,0 +1,47 @@
+name: 'new-version'
+description: 'set version and generate changelog'
+branding:
+  icon: 'git-commit'
+  color: 'red'
+inputs:
+  release:
+    description: "ready for release"
+    default: false
+outputs:
+  version:
+    description: "Version released"
+    value: ${{ steps.convco.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+
+    - name: Install tools
+      shell: bash
+      run: |
+        sudo apt install -y libarchive-tools
+
+    - name: Install convco
+      shell: bash
+      run: |
+        curl -#L https://github.com/convco/convco/releases/download/v0.5.1/convco-ubuntu.zip | bsdtar -xf- - -C /usr/local/bin/
+        chmod a+x /usr/local/bin/convco
+      
+    - uses: actions/checkout@v4
+      with:
+        path: "repo"
+        fetch-depth: 0
+
+    - id: convco
+      shell: bash
+      run: |
+
+        if [[ ${{ inputs.release }} == "true" ]]
+        then
+          VERSION=$(convco version -C ${{ github.workspace }}/repo --bump)
+        else
+          VERSION=$(convco version -C ${{ github.workspace }}/repo --prerelease dev --bump)
+        fi
+
+        echo ":balloon: New version: $VERSION" >> $GITHUB_STEP_SUMMARY
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+      

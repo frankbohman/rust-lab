@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     .register_encoded_file_descriptor_set(shared::proto::crud::FILE_DESCRIPTOR_SET)
     .build()?;
 
-  // grpcurl -plaintext 127.0.0.1:50051 describe crud.Crud
+  // grpcurl -plaintext 127.0.0.1:50052 describe crud.Crud
   // grpcurl -d '{"payload":{"message": "Heppåre!"}}' -import-path shared/proto -proto shared/proto/crud/crud.proto -plaintext 127.0.0.1:50051 crud.Crud/Create
   // grpcurl -d '{"id": "91632d47-b5de-42f6-85d8-1c6e58cf7845"}' -import-path shared/proto -proto shared/proto/crud/crud.proto -plaintext 127.0.0.1:50051 crud.Crud/Read
   Server::builder()
