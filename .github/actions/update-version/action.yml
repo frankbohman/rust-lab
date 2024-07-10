@@ -1,0 +1,62 @@
+name: 'update-version'
+description: 'set version, if release generate changelog'
+branding:
+  icon: 'git-commit'
+  color: 'red'
+inputs:
+  release:
+    description: "publish"
+    default: false
+outputs:
+  version:
+    description: "Generated version"
+    value: ${{ steps.convco.outputs.version }}
+runs:
+  using: "composite"
+  
+  steps:
+
+    - name: Install tools
+      shell: bash
+      run: |
+        sudo apt install -y libarchive-tools
+
+    - name: Install convco
+      shell: bash
+      run: |
+        curl -#L https://github.com/convco/convco/releases/download/v0.5.1/convco-ubuntu.zip | bsdtar -xf- - -C /usr/local/bin/
+        chmod a+x /usr/local/bin/convco
+        ls -lrta /usr/local/bin | grep con
+        echo "/usr/local/bin" >> $GITHUB_PATH
+        
+      
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - id: convco
+      shell: bash
+      run: |
+        
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+
+        
+        
+        
+        if [[ ${{ github.ref == 'refs/heads/main' }} ]]
+        then
+          VERSION=$(convco version --bump)
+          git tag $VERSION
+          convco changelog > CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -am "chore: Updating changelog"
+          git push
+          git push origin $VERSION
+          echo ":balloon: New release version: $VERSION" >> $GITHUB_STEP_SUMMARY
+        else
+          VERSION=$(convco version --prerelease dev --bump)
+          echo ":balloon: New dev version: $VERSION" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT

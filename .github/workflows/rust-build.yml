@@ -14,11 +14,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate Version
-        id: versioning
-        uses: frankbohman/rust-lab/.github/actions/versioning@main
+      - name: Update Version
+        id: version
+        uses: frankbohman/rust-lab/.github/actions/update-version@main
         with:
-          artifact: "dummy"
+          release: true
       - name: Print Version
         run: echo $NEW_VERSION
         shell: bash
@@ -47,4 +47,3 @@ jobs:
         run: |
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
-      
