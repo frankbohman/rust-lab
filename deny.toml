@@ -16,10 +16,9 @@ skip = [
 ]
 
 [advisories]
-ignore = ["RUSTSEC-2021-0141"]
+ignore = []
 
 [licenses]
-unlicensed = "allow"
 unused-allowed-license = "allow"
 allow = [
   "MIT",

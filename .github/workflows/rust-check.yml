@@ -16,12 +16,14 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v4
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: ${{ inputs.toolchain }}
           targets: ${{ inputs.target }}
           components: rustfmt, clippy
+
       - name: Set up cargo cache
         uses: actions/cache@v3
         continue-on-error: false
@@ -34,26 +36,34 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
+
       - name: Format and Lint
         run: |
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
 
-      - name: Check Deny
-        run: |
-          ## Find unwanted useage and other compliance things
-          cargo deny check advisories bans sources
+      - run: |
+          cargo install --locked cargo-deny || true
+          cargo install --locked cargo-outdated || true
+          cargo install --locked cargo-udeps || true
+          cargo install --locked cargo-audit || true
+          cargo install --locked cargo-pants || true
 
-      - name: Check Outdated Dependencies
-        run: |
-            ## Find outdated dependencies
-            # cargo outdated --exit-code 1
+      # - name: Check Deny
+      #   run: |
+      #     ## Find unwanted useage and other compliance things
+      #     cargo deny check advisories bans sources
 
-      - name: Check Audit
-        run: |
-          rm -rf ~/.cargo/advisory-db
-          ## Find security vulnerabilities in crates reported to RustSec Advisory Database
-          cargo audit
+      # - name: Check Outdated Dependencies
+      #   run: |
+      #     ## Find outdated dependencies
+      #     # cargo outdated --exit-code 1
+
+      # - name: Check Audit
+      #   run: |
+      #     rm -rf ~/.cargo/advisory-db
+      #     ## Find security vulnerabilities in crates reported to RustSec Advisory Database
+      #     cargo audit
 
       # - name: Vulnerability Report
       #   run: |

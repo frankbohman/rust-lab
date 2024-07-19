@@ -19,18 +19,22 @@ jobs:
         uses: frankbohman/rust-lab/.github/actions/update-version@main
         with:
           release: true
+
       - name: Print Version
         run: echo $NEW_VERSION
         shell: bash
         env:
           NEW_VERSION: ${{ steps.versioning.outputs.version }}
+
       - name: Check out
         uses: actions/checkout@v4
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: ${{ inputs.toolchain }}
           targets: ${{ inputs.target }}
+
       - name: Set up cargo cache
         uses: actions/cache@v4
         continue-on-error: false
@@ -43,6 +47,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
+
       - name: Build
         run: |
           cargo fmt --all -- --check
