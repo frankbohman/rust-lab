@@ -1,8 +1,8 @@
-name: 'update-version'
-description: 'set version, if release generate changelog'
+name: "update-version"
+description: "set version, if release generate changelog"
 branding:
-  icon: 'git-commit'
-  color: 'red'
+  icon: "git-commit"
+  color: "red"
 inputs:
   release:
     description: "publish"
@@ -13,9 +13,8 @@ outputs:
     value: ${{ steps.convco.outputs.version }}
 runs:
   using: "composite"
-  
-  steps:
 
+  steps:
     - name: Install tools
       shell: bash
       run: |
@@ -28,8 +27,7 @@ runs:
         chmod a+x /usr/local/bin/convco
         ls -lrta /usr/local/bin | grep con
         echo "/usr/local/bin" >> $GITHUB_PATH
-        
-      
+
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
@@ -37,13 +35,10 @@ runs:
     - id: convco
       shell: bash
       run: |
-        
+
         git config user.name github-actions
         git config user.email github-actions@github.com
 
-        
-        
-        
         if [[ ${{ github.ref == 'refs/heads/main' }} ]]
         then
           VERSION=$(convco version --bump)

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package se.internet.databamse;
+package crud;
 
 import "google/api/annotations.proto";
 
